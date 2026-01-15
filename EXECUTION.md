@@ -69,7 +69,7 @@ Esta es la funcionalidad clave del entregable **N2-P2-A**.
    - **Latitude/Longitude**: Coordenadas geográficas (ej. Sevilla: 37.3891, -5.9845).
    - **Threshold**: Umbral de temperatura (ej. 18 °C).
    - **Operator**: Condición a cumplir (ej. `>`).
-   - **Weeks**: Número de semanas hacia atrás a analizar (Máx. 12 desde UI).
+   - **Weeks**: Número de semanas hacia atrás a analizar.
 3. Pulsa **"Run Audit"**.
 4. **Resultados**:
    - Se mostrará un **Gráfico de Líneas** con la temperatura promedio semanal vs el umbral.
