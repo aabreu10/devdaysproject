@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Audits - DevDays</title>
+    <link rel="stylesheet" href="css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: end;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .stat-card.compliant { border-color: oklch(0.623 0.17 149.214); background-color: oklch(0.97 0 0); }
+        .stat-card.non-compliant { border-color: var(--destructive); background-color: oklch(0.985 0 0); }
+
+        .big-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+        
+        .label {
+            color: var(--muted-foreground);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <span>DevDays</span>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a href="audit.html" class="nav-link">Audit Logs</a>
+                </li>
+                <li class="nav-item">
+                    <a href="weather-audit.html" class="nav-link active">Weather Audit</a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <div class="page-title">Weather Data Audit</div>
+            </header>
+
+            <div class="content-wrapper">
+                
+                <div class="card full-width">
+                    <div class="card-header">
+                        <h3 class="card-title">Weather Audit</h3>
+                        <p style="font-size: 0.875rem; color: var(--muted-foreground);">Check historical weather data compliance against defined thresholds.</p>
+                    </div>
+
+                    <form id="auditForm" class="form-grid">
+                        <div class="form-group">
+                            <label for="city" class="label">City</label>
+                            <input type="text" id="city" class="input-text" value="Sevilla" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lat" class="label">Latitude</label>
+                            <input type="number" id="lat" class="input-text" step="0.0001" value="37.3891" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lon" class="label">Longitude</label>
+                            <input type="number" id="lon" class="input-text" step="0.0001" value="-5.9845" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="threshold" class="label">Threshold (°C)</label>
+                            <input type="number" id="threshold" class="input-text" value="18" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="operator" class="label">Operator</label>
+                            <select id="operator" class="input-select" style="width: 100%; padding: 0.5rem; border-radius: var(--radius); border: 1px solid var(--border);">
+                                <option value=">"> > (Greater than)</option>
+                                <option value="<"> < (Less than)</option>
+                                <option value=">="> >= (Greater or equal)</option>
+                                <option value="<="> <= (Less or equal)</option>
+                                <option value="=="> == (Equal)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="weeks" class="label">Weeks</label>
+                            <input type="number" id="weeks" class="input-text" value="4" min="1" required>
+                        </div>
+                        <button type="submit" id="runAuditBtn" class="btn-primary">Run Audit</button>
+                    </form>
+                </div>
+
+                <div id="resultsArea" style="display: none;">
+                    <div class="charts-container">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Temperature Trend</h3>
+                            </div>
+                            <div style="height: 300px; position: relative;">
+                                <canvas id="tempChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            <div class="card-header full-width">
+                                <h3 class="card-title">Compliance Score</h3>
+                            </div>
+                            <div style="height: 200px; width: 200px; position: relative;">
+                                <canvas id="gaugeChart"></canvas>
+                            </div>
+                            <div id="complianceText" class="big-number" style="margin-top: 1rem;"></div>
+                            <div id="complianceStatus" class="label"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card full-width">
+                    <div class="card-header">
+                        <h3 class="card-title">Weather Audit History</h3>
+                    </div>
+                    
+                    <div id="loading" style="display: none; padding: 20px;">Loading audits...</div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>City</th>
+                                <th>Threshold</th>
+                                <th>Weeks</th>
+                                <th>Compliance</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditBody"></tbody>
+                    </table>
+                </div>
+
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/weather-audit.js"></script>
+</body>
+</html>

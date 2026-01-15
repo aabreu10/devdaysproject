@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs - DevDays</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <span>DevDays</span>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a href="audit.html" class="nav-link active">Audit Logs</a>
+                </li>
+                <li class="nav-item">
+                    <a href="weather-audit.html" class="nav-link">Weather Audit</a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <div class="page-title">Audit Logs</div>
+            </header>
+
+            <div class="content-wrapper">
+                
+                <div class="action-bar">
+                    <button id="runAuditBtn" class="btn-primary">Run New Audit</button>
+                </div>
+
+                <div class="card full-width">
+                    <div class="card-header">
+                        <h3 class="card-title">Audit History</h3>
+                        <p style="font-size: 0.875rem; color: hsl(var(--muted-foreground)); margin: 0;">Logs of compliance checks</p>
+                    </div>
+                    
+                    <div id="loading" style="display: none; padding: 20px;">Loading audits...</div>
+                    <div id="error" style="color: red; display: none; padding: 20px;"></div>
+
+                    <table class="data-table" id="auditTable">
+                        <thead>
+                            <tr>
+                                <th>Audit ID</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Total Issues</th>
+                                <th>Bug Issues</th>
+                                <th>Ratio</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditBody"></tbody>
+                    </table>
+                </div>
+
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/audit.js"></script>
+</body>
+</html>
