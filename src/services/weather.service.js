@@ -1,8 +1,16 @@
 import axios from 'axios';
+import { metrics } from '@opentelemetry/api';
+
+const meter = metrics.getMeter('weather-service');
+const weatherDurationHistogram = meter.createHistogram('weather_api_duration', {
+    description: 'Duration of weather API calls in milliseconds',
+    unit: 'ms',
+});
 
 const OPENMETEO_API_URL = 'https://archive-api.open-meteo.com/v1/archive';
 
 export const getWeatherData = async (city, latitude, longitude, weeks = 4) => {
+    const startTime = performance.now();
     try {
         const endDate = new Date();
         const startDate = new Date();
@@ -22,6 +30,9 @@ export const getWeatherData = async (city, latitude, longitude, weeks = 4) => {
             }
         });
 
+        const duration = performance.now() - startTime;
+        weatherDurationHistogram.record(duration, { city });
+        
         if (!response.data.daily) {
             throw new Error('No weather data received from OpenMeteo');
         }
@@ -37,6 +48,8 @@ export const getWeatherData = async (city, latitude, longitude, weeks = 4) => {
             meanTemperatures: response.data.daily.temperature_2m_mean
         };
     } catch (error) {
+        const duration = performance.now() - startTime;
+        weatherDurationHistogram.record(duration, { city, error: 'true' });
         console.error(`Error fetching weather data for ${city}:`, error.message);
         throw new Error(`Failed to fetch weather data: ${error.message}`);
     }
